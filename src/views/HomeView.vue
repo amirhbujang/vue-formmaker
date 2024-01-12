@@ -2,19 +2,25 @@
 import { ref, watch, onMounted } from 'vue';
 import MonacoEditor from 'monaco-editor-vue3'
 
+// name to be used as key in local storage
 const inputKeyName = ref('');
 const templateKeyName = ref('');
 
+// list of keys in localstorage
 const savedInput = ref([]);
 const savedTemplate = ref([]);
 
+// form input data
 const fields = ref([
   { name: 'username', widget: 'text', validation: { required: true }, _expand: false },
   { name: 'password', widget: 'password', validation: { required: true }, _expand: false }
 ]);
+
+// template and generated code data
 const templateCode = ref("{% for field in fields %}{{ field.name }}\n{% endfor %}");
 const generatedCode = ref("");
 
+//  options for monaco text editor
 const options = {
   colorDecorators: true,
   lineHeight: 18,
@@ -32,10 +38,10 @@ const widgetChoices = [
   'radio',
 ]
 
+// update generated code on every update
 watch(fields.value, () => {
   generate();
 })
-
 
 const addField = function () {
   fields.value.push({ name: '', widget: 'text', validation: { required: true }, _expand: false })
@@ -77,11 +83,13 @@ const removeField = function (i) {
   }
 }
 
+// generate code from input and template
 const generate = function () {
   nunjucks.configure({ autoescape: true });
   generatedCode.value = nunjucks.renderString(templateCode.value, { fields: fields.value });
 }
 
+// generate label from field name
 function generateLabelValue(index) {
   fields.value[index].label = camelToLabel(fields.value[index].name);
 }
@@ -95,6 +103,9 @@ function camelToLabel(string) {
   return capitalizeFirstLetter(string);
 }
 
+// handle key shortcuts on name and label input
+// arrow key up, down, left and right: move cursor to adjacent input
+// ctrl + [up|down] move field up or down
 function actionKey(e, key, index) {
   console.log(e.target.selectionStart)
   console.log(e.target.selectionEnd)
@@ -120,6 +131,7 @@ function actionKey(e, key, index) {
   }
 }
 
+// focus on input and move cursor to end position
 function focusById(id) {
   // setTimeout required for google chrome
   setTimeout(() => {
@@ -166,23 +178,28 @@ const saveInput = function () {
 <template>
   <div class="grid">
     <div class="col">
-      <!-- Input -->
+      <!-- Input Header -->
       <div class="flex align-items-top pb-1 mb-2 border-bottom-1 surface-300">
+        <!-- save input data -->
         <input type="text" class="px-2 py-1 mr-1" placeholder="Form name" v-model="inputKeyName">
         <button @click="saveInput" class="px-2 py-1 mr-3">Save</button>
 
+        <!-- load input data -->
         <select name="" id="" class="px-2 py-1 mr-1" v-model="inputKeyName">
           <option :value="key" v-for="key in savedInput" :key="key">{{ key }}</option>
         </select>
         <button @click="loadInput" class="px-2 py-1 mr-3">Load</button>
         
 
+        <!-- Collapse, Add Field -->
         <button class="py-1 mr-1" @click="collapseAll">Collapse All</button>
         <button class="py-1 mr-1" @click="addField">Add Field</button>
       </div>
 
+      <!-- Input form (the fields) -->
       <template v-for="(field, i) in fields" :key="i">
         <div>
+          <!-- Name, Label, Remove, Up, Down, Expand -->
           <div :class="field._expand ? 'bg-pink-100 border-top-1 pt-1 pb-1' : 'pb-1'">
             <input type="text" placeholder="Name" v-model="field.name" class="w-15rem px-2 py-1 mr-1"
               @change="() => generateLabelValue(i)" @keydown="(e) => actionKey(e, 'name', i)" :id="`input-name-${i}`">
@@ -196,6 +213,7 @@ const saveInput = function () {
               {{ field._expand ? 'Less' : 'More' }}
             </button>
 
+            <!-- Summary for expanded part (when collapsed) -->
             <div v-if="!field._expand" class="text-xs mb-2">
               <small class="mr-1">
                 <strong>Type </strong>
@@ -214,25 +232,30 @@ const saveInput = function () {
             </div>
           </div>
 
+          <!-- Expanded part -->
           <div class="bg-pink-100" v-if="field._expand">
+            <!-- Placeholder, Default Value -->
             <div>
               <input type="text" placeholder="Placeholder" v-model="field.placeholder"
                 class="w-15rem px-2 py-1 mb-1 mr-1">
               <input type="text" placeholder="Default value" v-model="field.defaultValue"
                 class="w-15rem px-2 py-1 mb-1 mr-1">
             </div>
+            <!-- class label, class input -->
             <div>
               <input type="text" placeholder="class (label)" v-model="field.classLabel"
                 class="w-15rem px-2 py-1 mb-1 mr-1">
               <input type="text" placeholder="class (input)" v-model="field.classInput"
                 class="w-15rem px-2 py-1 mb-1 mr-1">
             </div>
+            <!-- :class label, :class input -->
             <div>
               <textarea class="w-15rem px-2 py-1 mr-1 mb-1" placeholder=":class (label)"
                 v-model="field._classLabel"></textarea>
               <textarea class="w-15rem px-2 py-1 mr-1 mb-1" placeholder=":class (input)"
                 v-model="field._classInput"></textarea>
             </div>
+            <!-- widget selection -->
             <div class="flex align-items-center mb-2">
               <div class="w-6rem">Widget</div>
               <template v-for="(widget, iw) in widgetChoices" :key="`${i}-widget-${iw}`">
@@ -240,11 +263,13 @@ const saveInput = function () {
                 <label :for="`${i}-widget-${iw}`" class="mr-1 mt-1">{{ widget }}</label>
               </template>
             </div>
+            <!-- custom code to load selection data -->
             <div class="flex align-items-top mb-2">
               <div class="w-6rem">onMounted</div>
               <textarea class="w-30rem px-2 py-1 mr-1 mb-1" id="" cols="30" rows="4" v-model="field.onMounted"
                 placeholder="Options for select/checkbox/radio"></textarea>
             </div>
+            <!-- validation options -->
             <div class="flex align-items-center mb-2 pb-2 border-bottom-1">
               <div class="w-6rem">Validation</div>
               <input type="checkbox" :id="`${i}-widget-required`" v-model="field.validation.required" value="yes">
