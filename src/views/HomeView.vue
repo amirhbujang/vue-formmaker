@@ -278,7 +278,7 @@ const saveInput = function () {
                   placeholder="Options for select/checkbox/radio"></textarea>
               </div>
               <!-- validation options -->
-              <div class="flex align-items-center mb-2 pb-2 border-bottom-1">
+              <div class="flex align-items-center mb-2">
                 <div class="w-6rem">Validation</div>
                 <input type="checkbox" :id="`${i}-widget-required`" v-model="field.validation.required" value="yes">
                 <label :for="`${i}-widget-required`" class="mr-2">required</label>
@@ -289,6 +289,10 @@ const saveInput = function () {
                 <input type="checkbox" :id="`${i}-widget-maxlength`" v-model="field.validation.maxLength" value="yes">
                 <label :for="`${i}-widget-maxlength`">max length=</label>
                 <input type="text" id="" v-model="field.validation.maxLengthValue" class="w-2rem px-1">
+              </div>
+              <!-- Custom validation codes -->
+              <div class="mb-2 pb-2 border-bottom-1">
+                <textarea rows="5" class="w-11 px-2 py-1 mr-1 mb-1" v-model="field.customValidation" placeholder="custom code for validation"></textarea>
               </div>
             </div>
           </div>
