@@ -272,11 +272,11 @@ const saveInput = function () {
                 </template>
               </div>
               <!-- custom code to load selection data -->
-              <div class="flex align-items-top mb-2">
-                <div class="w-6rem">onMounted</div>
-                <textarea class="w-30rem px-2 py-1 mr-1 mb-1" id="" cols="30" rows="4" v-model="field.onMounted"
-                  placeholder="Options for select/checkbox/radio"></textarea>
+              <div class="mb-2">
+                <textarea rows="5" class="w-11 px-2 py-1 mr-1 mb-1" v-model="field.onMounted"
+                  placeholder="onMounted(() => { ...Options for select/checkbox/radio })"></textarea>
               </div>
+
               <!-- validation options -->
               <div class="flex align-items-center mb-2">
                 <div class="w-6rem">Validation</div>
