@@ -1,6 +1,12 @@
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 import MonacoEditor from 'monaco-editor-vue3'
+
+const inputKeyName = ref('');
+const templateKeyName = ref('');
+
+const savedInput = ref([]);
+const savedTemplate = ref([]);
 
 const fields = ref([
   { name: 'username', widget: 'text', validation: { required: true }, _expand: false },
@@ -127,8 +133,35 @@ function focusById(id) {
   }, 0);
 }
 
-const load = function () { }
-const save = function () { }
+onMounted(() => {
+  const localstorageKeys = Object.keys(localStorage);
+  savedInput.value = localstorageKeys.filter(k => k.match(/^saved-input-/)).map(k => k.substring("saved-input-".length))
+  savedTemplate.value = localstorageKeys.filter(k => k.match(/^saved-template-/)).map(k => k.substring("saved-template-".length))
+})
+
+const loadTemplate = function () {
+  templateCode.value = localStorage.getItem(`saved-template-${templateKeyName.value}`);
+}
+
+const saveTemplate = function () {
+  localStorage.setItem(`saved-template-${templateKeyName.value}`, templateCode.value)
+
+  if (!savedTemplate.value.includes(templateKeyName))
+    savedTemplate.value.push(templateKeyName.value);
+}
+
+const loadInput = function () {
+  const fieldsData = localStorage.getItem(`saved-input-${inputKeyName.value}`);
+  fields.value = JSON.parse(fieldsData);
+}
+
+const saveInput = function () {
+  localStorage.setItem(`saved-input-${inputKeyName.value}`, JSON.stringify(fields.value))
+
+  if (!savedInput.value.includes(inputKeyName))
+    savedInput.value.push(inputKeyName.value);
+}
+
 
 </script>
 
@@ -137,13 +170,14 @@ const save = function () { }
     <div class="col">
       <!-- Input -->
       <div class="flex align-items-top pb-1 mb-2 border-bottom-1 surface-300">
-        <input type="text" class="px-2 py-1 mr-1" placeholder="Form name">
-        <select name="" id="" class="px-2 py-1 mr-1">
-          <option value="">Register form</option>
-          <option value="">Inline form</option>
+        <input type="text" class="px-2 py-1 mr-1" placeholder="Form name" v-model="inputKeyName">
+        <button @click="saveInput" class="px-2 py-1 mr-3">Save</button>
+
+        <select name="" id="" class="px-2 py-1 mr-1" v-model="inputKeyName">
+          <option :value="key" v-for="key in savedInput" :key="key">{{ key }}</option>
         </select>
-        <button @click="load" class="px-2 py-1 mr-1">Load</button>
-        <button @click="save" class="px-2 py-1 mr-3">Save</button>
+        <button @click="loadInput" class="px-2 py-1 mr-3">Load</button>
+        
 
         <button class="py-1 mr-1" @click="collapseAll">Collapse All</button>
         <button class="py-1 mr-1" @click="addField">Add Field</button>
@@ -233,13 +267,13 @@ const save = function () { }
     <div class="col">
       <!-- Template -->
       <div class="flex align-items-top mb-1">
-        <input type="text" class="px-2 py-1 mr-1" placeholder="Template name">
-        <select name="" id="" class="px-2 py-1 mr-1">
-          <option value="">Register form</option>
-          <option value="">Inline form</option>
+        <input type="text" class="px-2 py-1 mr-1" placeholder="Form name" v-model="templateKeyName">
+        <button @click="saveTemplate" class="px-2 py-1 mr-3">Save</button>
+
+        <select name="" id="" class="px-2 py-1 mr-1" v-model="templateKeyName">
+          <option :value="key" v-for="key in savedTemplate" :key="key">{{ key }}</option>
         </select>
-        <button @click="load" class="px-2 py-1 mr-1">Load</button>
-        <button @click="save" class="px-2 py-1">Save</button>
+        <button @click="loadTemplate" class="px-2 py-1 mr-3">Load</button>
       </div>
 
       <!-- Template Editor -->
