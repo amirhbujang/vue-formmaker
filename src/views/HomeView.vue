@@ -16,6 +16,9 @@ const fields = ref([
   { name: 'password', widget: 'password', validation: { required: true }, _expand: false }
 ]);
 
+// flag to show input data as json or form
+const viewJSON = ref(false);
+
 // template and generated code data
 const templateCode = ref("{% for field in fields %}{{ field.name }}\n{% endfor %}");
 const generatedCode = ref("");
@@ -189,101 +192,107 @@ const saveInput = function () {
           <option :value="key" v-for="key in savedInput" :key="key">{{ key }}</option>
         </select>
         <button @click="loadInput" class="px-2 py-1 mr-3">Load</button>
-        
+
 
         <!-- Collapse, Add Field -->
+        <button class="py-1 mr-1" @click="() => viewJSON = !viewJSON">{{ viewJSON? 'Form': 'JSON' }}</button>
         <button class="py-1 mr-1" @click="collapseAll">Collapse All</button>
         <button class="py-1 mr-1" @click="addField">Add Field</button>
       </div>
 
+      <!-- Input as JSON -->
+      <div v-if="viewJSON"><pre>{{ JSON.stringify(fields, null, 2) }}</pre></div>
+
       <!-- Input form (the fields) -->
-      <template v-for="(field, i) in fields" :key="i">
-        <div>
-          <!-- Name, Label, Remove, Up, Down, Expand -->
-          <div :class="field._expand ? 'bg-pink-100 border-top-1 pt-1 pb-1' : 'pb-1'">
-            <input type="text" placeholder="Name" v-model="field.name" class="w-15rem px-2 py-1 mr-1"
-              @change="() => generateLabelValue(i)" @keydown="(e) => actionKey(e, 'name', i)" :id="`input-name-${i}`">
-            <input type="text" placeholder="Label" v-model="field.label" class="w-9rem px-2 py-1 mr-1"
-              @keydown="(e) => actionKey(e, 'label', i)" :id="`input-label-${i}`">
-            <button tabindex="-1" class="py-1 mr-1" @click="() => removeField(i)">Remove</button>
-            <button tabindex="-1" class="py-1 mr-1" @click="() => moveUp(i)">Up</button>
-            <button tabindex="-1" class="py-1 mr-1" @click="() => moveDown(i)">Dw</button>
-            <button tabindex="-1" class="py-1 mr-1" :class="field._expand ? 'bg-pink-200' : ''"
-              @click="() => field._expand = !field._expand">
-              {{ field._expand ? 'Less' : 'More' }}
-            </button>
+      <template v-if="!viewJSON">
+        <template v-for="(field, i) in fields" :key="i">
+          <div>
+            <!-- Name, Label, Remove, Up, Down, Expand -->
+            <div :class="field._expand ? 'bg-pink-100 border-top-1 pt-1 pb-1' : 'pb-1'">
+              <input type="text" placeholder="Name" v-model="field.name" class="w-15rem px-2 py-1 mr-1"
+                @change="() => generateLabelValue(i)" @keydown="(e) => actionKey(e, 'name', i)" :id="`input-name-${i}`">
+              <input type="text" placeholder="Label" v-model="field.label" class="w-9rem px-2 py-1 mr-1"
+                @keydown="(e) => actionKey(e, 'label', i)" :id="`input-label-${i}`">
+              <button tabindex="-1" class="py-1 mr-1" @click="() => removeField(i)">Remove</button>
+              <button tabindex="-1" class="py-1 mr-1" @click="() => moveUp(i)">Up</button>
+              <button tabindex="-1" class="py-1 mr-1" @click="() => moveDown(i)">Dw</button>
+              <button tabindex="-1" class="py-1 mr-1" :class="field._expand ? 'bg-pink-200' : ''"
+                @click="() => field._expand = !field._expand">
+                {{ field._expand ? 'Less' : 'More' }}
+              </button>
 
-            <!-- Summary for expanded part (when collapsed) -->
-            <div v-if="!field._expand" class="text-xs mb-2">
-              <small class="mr-1">
-                <strong>Type </strong>
-                {{ field.widget }}
-              </small>
-              <small class="mr-1">
-                <strong> onMounted </strong>
-                <span v-if="field.onMounted" @click="() => field._expand = true"
-                  class="text-primary cursor-pointer">[code]</span>
-                <span v-else class="text-500 font-italic">None</span>
-              </small>
-              <small>
-                <strong> Validation </strong>
-                <span>{{ Object.entries(field.validation).filter(arr => arr[1]).map(arr => arr[0]).join(',') }}</span>
-              </small>
+              <!-- Summary for expanded part (when collapsed) -->
+              <div v-if="!field._expand" class="text-xs mb-2">
+                <small class="mr-1">
+                  <strong>Type </strong>
+                  {{ field.widget }}
+                </small>
+                <small class="mr-1">
+                  <strong> onMounted </strong>
+                  <span v-if="field.onMounted" @click="() => field._expand = true"
+                    class="text-primary cursor-pointer">[code]</span>
+                  <span v-else class="text-500 font-italic">None</span>
+                </small>
+                <small>
+                  <strong> Validation </strong>
+                  <span>{{ Object.entries(field.validation).filter(arr => arr[1]).map(arr => arr[0]).join(',') }}</span>
+                </small>
+              </div>
+            </div>
+
+            <!-- Expanded part -->
+            <div class="bg-pink-100" v-if="field._expand">
+              <!-- Placeholder, Default Value -->
+              <div>
+                <input type="text" placeholder="Placeholder" v-model="field.placeholder"
+                  class="w-15rem px-2 py-1 mb-1 mr-1">
+                <input type="text" placeholder="Default value" v-model="field.defaultValue"
+                  class="w-15rem px-2 py-1 mb-1 mr-1">
+              </div>
+              <!-- class label, class input -->
+              <div>
+                <input type="text" placeholder="class (label)" v-model="field.classLabel"
+                  class="w-15rem px-2 py-1 mb-1 mr-1">
+                <input type="text" placeholder="class (input)" v-model="field.classInput"
+                  class="w-15rem px-2 py-1 mb-1 mr-1">
+              </div>
+              <!-- :class label, :class input -->
+              <div>
+                <textarea class="w-15rem px-2 py-1 mr-1 mb-1" placeholder=":class (label)"
+                  v-model="field._classLabel"></textarea>
+                <textarea class="w-15rem px-2 py-1 mr-1 mb-1" placeholder=":class (input)"
+                  v-model="field._classInput"></textarea>
+              </div>
+              <!-- widget selection -->
+              <div class="flex align-items-center mb-2">
+                <div class="w-6rem">Widget</div>
+                <template v-for="(widget, iw) in widgetChoices" :key="`${i}-widget-${iw}`">
+                  <input type="radio" :id="`${i}-widget-${iw}`" v-model="field.widget" :value="widget">
+                  <label :for="`${i}-widget-${iw}`" class="mr-1 mt-1">{{ widget }}</label>
+                </template>
+              </div>
+              <!-- custom code to load selection data -->
+              <div class="flex align-items-top mb-2">
+                <div class="w-6rem">onMounted</div>
+                <textarea class="w-30rem px-2 py-1 mr-1 mb-1" id="" cols="30" rows="4" v-model="field.onMounted"
+                  placeholder="Options for select/checkbox/radio"></textarea>
+              </div>
+              <!-- validation options -->
+              <div class="flex align-items-center mb-2 pb-2 border-bottom-1">
+                <div class="w-6rem">Validation</div>
+                <input type="checkbox" :id="`${i}-widget-required`" v-model="field.validation.required" value="yes">
+                <label :for="`${i}-widget-required`" class="mr-2">required</label>
+
+                <input type="checkbox" :id="`${i}-widget-email`" v-model="field.validation.email" value="yes">
+                <label :for="`${i}-widget-email`" class="mr-2">email</label>
+
+                <input type="checkbox" :id="`${i}-widget-maxlength`" v-model="field.validation.maxLength" value="yes">
+                <label :for="`${i}-widget-maxlength`">max length=</label>
+                <input type="text" id="" v-model="field.validation.maxLengthValue" class="w-2rem px-1">
+              </div>
             </div>
           </div>
-
-          <!-- Expanded part -->
-          <div class="bg-pink-100" v-if="field._expand">
-            <!-- Placeholder, Default Value -->
-            <div>
-              <input type="text" placeholder="Placeholder" v-model="field.placeholder"
-                class="w-15rem px-2 py-1 mb-1 mr-1">
-              <input type="text" placeholder="Default value" v-model="field.defaultValue"
-                class="w-15rem px-2 py-1 mb-1 mr-1">
-            </div>
-            <!-- class label, class input -->
-            <div>
-              <input type="text" placeholder="class (label)" v-model="field.classLabel"
-                class="w-15rem px-2 py-1 mb-1 mr-1">
-              <input type="text" placeholder="class (input)" v-model="field.classInput"
-                class="w-15rem px-2 py-1 mb-1 mr-1">
-            </div>
-            <!-- :class label, :class input -->
-            <div>
-              <textarea class="w-15rem px-2 py-1 mr-1 mb-1" placeholder=":class (label)"
-                v-model="field._classLabel"></textarea>
-              <textarea class="w-15rem px-2 py-1 mr-1 mb-1" placeholder=":class (input)"
-                v-model="field._classInput"></textarea>
-            </div>
-            <!-- widget selection -->
-            <div class="flex align-items-center mb-2">
-              <div class="w-6rem">Widget</div>
-              <template v-for="(widget, iw) in widgetChoices" :key="`${i}-widget-${iw}`">
-                <input type="radio" :id="`${i}-widget-${iw}`" v-model="field.widget" :value="widget">
-                <label :for="`${i}-widget-${iw}`" class="mr-1 mt-1">{{ widget }}</label>
-              </template>
-            </div>
-            <!-- custom code to load selection data -->
-            <div class="flex align-items-top mb-2">
-              <div class="w-6rem">onMounted</div>
-              <textarea class="w-30rem px-2 py-1 mr-1 mb-1" id="" cols="30" rows="4" v-model="field.onMounted"
-                placeholder="Options for select/checkbox/radio"></textarea>
-            </div>
-            <!-- validation options -->
-            <div class="flex align-items-center mb-2 pb-2 border-bottom-1">
-              <div class="w-6rem">Validation</div>
-              <input type="checkbox" :id="`${i}-widget-required`" v-model="field.validation.required" value="yes">
-              <label :for="`${i}-widget-required`" class="mr-2">required</label>
-
-              <input type="checkbox" :id="`${i}-widget-email`" v-model="field.validation.email" value="yes">
-              <label :for="`${i}-widget-email`" class="mr-2">email</label>
-
-              <input type="checkbox" :id="`${i}-widget-maxlength`" v-model="field.validation.maxLength" value="yes">
-              <label :for="`${i}-widget-maxlength`">max length=</label>
-              <input type="text" id="" v-model="field.validation.maxLengthValue" class="w-2rem px-1">
-            </div>
-          </div>
-        </div>
+        </template>
       </template>
     </div>
 
