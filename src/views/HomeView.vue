@@ -110,14 +110,12 @@ function actionKey(e, key, index) {
 
     focusById(`input-${key}-${index - 1}`);
   } else if (e.code == 'ArrowLeft' && key == 'label') {
-    if(e.target.selectionStart == e.target.selectionEnd && e.target.selectionStart == 0) {
+    if (e.target.selectionStart == e.target.selectionEnd && e.target.selectionStart == 0) {
       focusById(`input-name-${index}`);
-      console.log('gogogo')
     }
-  }else if (e.code == 'ArrowRight' && key == 'name') {
-    if(e.target.selectionStart == e.target.selectionEnd && e.target.selectionStart == e.target.value.length) {
+  } else if (e.code == 'ArrowRight' && key == 'name') {
+    if (e.target.selectionStart == e.target.selectionEnd && e.target.selectionStart == e.target.value.length) {
       focusById(`input-label-${index}`);
-      console.log('gogogo1')
     }
   }
 }
@@ -294,6 +292,7 @@ const saveInput = function () {
 body,
 input,
 textarea,
+select,
 label,
 div,
 button {
