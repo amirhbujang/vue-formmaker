@@ -180,7 +180,7 @@ const saveInput = function () {
 
 <template>
   <div class="grid">
-    <div class="col">
+    <div class="col-12 xl:col-5">
       <!-- Input Header -->
       <div class="flex align-items-top pb-1 mb-2 border-bottom-1 surface-300">
         <!-- save input data -->
@@ -296,7 +296,7 @@ const saveInput = function () {
       </template>
     </div>
 
-    <div class="col">
+    <div class="col-12 xl:col-4">
       <!-- Template -->
       <div class="flex align-items-top mb-1">
         <input type="text" class="px-2 py-1 mr-1" placeholder="Form name" v-model="templateKeyName">
@@ -309,14 +309,14 @@ const saveInput = function () {
       </div>
 
       <!-- Template Editor -->
-      <MonacoEditor :options="options" language="html" :width="800" :height="800" v-model:value="templateCode">
+      <MonacoEditor :options="options" language="html" width="100%" :height="800" v-model:value="templateCode">
       </MonacoEditor>
     </div>
 
-    <div class="col">
+    <div class="col-12 xl:col-3">
       <button @click="generate" class="px-2 py-1 mb-1">Generate</button>
       <!-- Result Editor -->
-      <MonacoEditor :options="options" language="html" :width="600" :height="800" v-model:value="generatedCode">
+      <MonacoEditor :options="options" language="html" width="100%" :height="800" v-model:value="generatedCode">
       </MonacoEditor>
     </div>
   </div>
