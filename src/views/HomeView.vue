@@ -195,13 +195,15 @@ const saveInput = function () {
 
 
         <!-- Collapse, Add Field -->
-        <button class="py-1 mr-1" @click="() => viewJSON = !viewJSON">{{ viewJSON? 'Form': 'JSON' }}</button>
+        <button class="py-1 mr-1" @click="() => viewJSON = !viewJSON">{{ viewJSON ? 'Form' : 'JSON' }}</button>
         <button class="py-1 mr-1" @click="collapseAll">Collapse All</button>
         <button class="py-1 mr-1" @click="addField">Add Field</button>
       </div>
 
       <!-- Input as JSON -->
-      <div v-if="viewJSON"><pre>{{ JSON.stringify(fields, null, 2) }}</pre></div>
+      <div v-if="viewJSON">
+        <pre>{{ JSON.stringify(fields, null, 2) }}</pre>
+      </div>
 
       <!-- Input form (the fields) -->
       <template v-if="!viewJSON">
