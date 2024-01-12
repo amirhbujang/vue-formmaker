@@ -18,6 +18,7 @@ const fields = ref([
 
 // flag to show input data as json or form
 const viewJSON = ref(false);
+const copySuccessFlag = ref(false);
 
 // template and generated code data
 const templateCode = ref("{% for field in fields %}{{ field.name }}\n{% endfor %}");
@@ -175,6 +176,14 @@ const saveInput = function () {
     savedInput.value.push(inputKeyName.value);
 }
 
+function copyToClipboard() {
+  navigator.clipboard.writeText(generatedCode.value);
+
+  copySuccessFlag.value = true;
+  setTimeout(function() {
+    copySuccessFlag.value = false;
+  }, 1000)
+}
 
 </script>
 
@@ -320,7 +329,9 @@ const saveInput = function () {
     </div>
 
     <div class="col-12 xl:col-3">
-      <button @click="generate" class="px-2 py-1 mb-1">Generate</button>
+      <button @click="generate" class="px-2 py-1 mb-1 mr-1">Generate</button>
+      <button @click="copyToClipboard" class="px-2 py-1 mb-1 mr-2">Copy</button>
+      <span v-if="copySuccessFlag" class="bg-teal-500 text-white p-1">Copied to clipboard!</span>
       <!-- Result Editor -->
       <MonacoEditor :options="options" language="html" width="100%" :height="800" v-model:value="generatedCode">
       </MonacoEditor>
