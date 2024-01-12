@@ -303,7 +303,8 @@ function copyToClipboard() {
               </div>
               <!-- Custom validation codes -->
               <div class="mb-2 pb-2 border-bottom-1">
-                <textarea rows="5" class="w-11 px-2 py-1 mr-1 mb-1" v-model="field.customValidation" placeholder="custom code for validation"></textarea>
+                <textarea rows="5" class="w-11 px-2 py-1 mr-1 mb-1" v-model="field.customValidation"
+                  placeholder="custom code for validation"></textarea>
               </div>
             </div>
           </div>
